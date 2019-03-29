@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+
+<!-- mem.xml -->
+<!-- 실행할 SQL문을 정의해놓은 파일 -->
+<!-- MyBatis에서는 namespace를 필수로 설정해야함 -->
+<mapper namespace="mem">
+	
+	<!-- 
+	  - 데이터베이스 결과 데이터를 객체에 매핑하는 방법을 정의
+	  - ResultSet에서 가져와서 DTO에 담는것과 비슷
+	  - 기본키(PK)는 <id>에 지정한다.	 
+	--> 
+	<resultMap type="net.mem.MemDTO" id="rs">
+		<!-- <id/> PK칼럼 지정 -->
+		<result column="num" property="num"/>
+		<result column="name" property="name"/>
+		<result column="age" property="age"/>
+	</resultMap>
+	
+	
+	<insert id="insertRow" parameterType="memDTO">
+		INSERT INTO mem (num, name, age)
+		VALUES(mem_seq.nextval, #{name}, #{age})
+	</insert>
+	
+	<select id="selectAll" resultMap="rs">
+		SELECT num, name, age
+		FROM mem
+		ORDER BY num DESC
+	</select>
+	
+	<update id="updateRow" parameterType="memDTO">
+		UPDATE mem
+		SET name=#{name}, age=#{age}
+		WHERE num=#{num}
+	</update>
+	
+	<!-- parameterType = memDTO로 받아도 무관 -->
+	<delete id="deleteRow" parameterType="int">
+		DELETE FROM mem
+		WHERE num=#{a}
+	</delete>
+	
+	<!-- SQL문에 특수문자 <>등을 사용해야 하는 경우 -->
+	<delete id="deleteRow2" parameterType="int">
+		<![CDATA[
+		DELETE FROM mem
+		WHERE num <= #{a}
+		]]>
+	</delete>
+	
+	<select id="selectRead" parameterType="memDTO" resultType="memDTO">
+		SELECT num, name, age
+		FROM mem
+		WHERE num = #{num}
+	</select>
+	
+	<sql id="tablename">
+		SELECT num, name, age
+		FROM mem
+	</sql>
+	
+	<sql id="sort">
+		ORDER BY num DESC
+	</sql>
+	
+	<select id="search" parameterType="String" resultMap="rs">
+		<include refid="tablename"></include>
+		WHERE name like '%' || #{keyword} || '%'
+		<include refid="sort"></include>
+	</select>
+	
+	<select id="rowCount" resultType="int">
+		SELECT COUNT(*) FROM mem
+	</select>
+	
+</mapper>
